@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { billingAPI } from "../../../src/services/billingAPI.js";
+import classNames from 'classnames';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Toast } from 'primereact/toast';
@@ -11,7 +12,10 @@ import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
 import { Dropdown } from 'primereact/dropdown';
 import { ProgressSpinner } from 'primereact/progressspinner';
+import { Calendar } from 'primereact/calendar';
+import {Checkbox} from 'primereact/checkbox';
 import "../../assets/css/main.css";
+
 
 export const Configuracion = ({ setState }) => {
     let emptyClient = {
@@ -22,8 +26,12 @@ export const Configuracion = ({ setState }) => {
         cli_address: "",
         cli_email: "",
         cli_phone: "",
-        cli_status: "",
-        cli_payment_id: ""
+        cli_status: false,
+        cli_payment_type_id: 0,
+        payments_type: {
+            pt_id: 0,
+            pt_value: ""
+        }
     };
 
     const [productDialog, setProductDialog] = useState(false);
@@ -36,24 +44,31 @@ export const Configuracion = ({ setState }) => {
     const dt = useRef(null);
     const [client, setClient] = useState(emptyClient);
     const [clients, setClients] = useState(null);
+    const [payment_types, setPayment_types] = useState(null);
 
     useEffect(() => {
         getAllClients();
+        getAllPaymentsTypes();
     }, []);
 
     const getAllClients = async () => {
         const data = await (billingAPI.get("clients/getAll"));
         setClients(data.data.clientsAll);
+        console.log(data.data.clientsAll)
+    };
+    const getAllPaymentsTypes = async () => {
+        const data = await (billingAPI.get("paymentsTypes"));
+        setPayment_types(data.data.paymentsTypesAll);
     };
 
 
     const createClient = async () => {
-        const data = await (billingAPI.post(`clients/crearNuevoCliente/?cli_id_card=${client.cli_id_card}&cli_name=${client.cli_name}&cli_born_date=${client.cli_born_date}&cli_address=${client.cli_address}&cli_email=${client.cli_email}&cli_phone=${client.cli_phone}&cli_status=${client.cli_status}&cli_client_type_id=${client.cli_payment_id}`));
+        const data = await (billingAPI.post(`clients/crearNuevoCliente/?cli_id_card=${client.cli_id_card}&cli_name=${client.cli_name}&cli_born_date=${client.cli_born_date}&cli_address=${client.cli_address}&cli_email=${client.cli_email}&cli_phone=${client.cli_phone}&cli_status=${client.cli_status}&cli_client_type_id=${client.cli_payment_type_id}`));
         toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Product Updated', life: 3000 });
     };
 
     const updateClient = async (client) => {
-        const data = await (billingAPI.put(`clients/actualizarCliente/${client.cli_id}/?cli_id_card=${client.cli_id_card}&cli_name=${client.cli_name}&cli_born_date=${client.cli_born_date}&cli_address=${client.cli_address}&cli_email=${client.cli_email}&cli_phone=${client.cli_phone}&cli_status=${client.cli_status}&cli_client_type_id=${client.cli_payment_id}`));
+        const data = await (billingAPI.put(`clients/actualizarCliente/${client.cli_id}/?cli_id_card=${client.cli_id_card}&cli_name=${client.cli_name}&cli_born_date=${client.cli_born_date}&cli_address=${client.cli_address}&cli_email=${client.cli_email}&cli_phone=${client.cli_phone}&cli_status=${client.cli_status}&cli_client_type_id=${client.cli_payment_type_id}`));
         toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Product Updated', life: 3000 });
     };
 
@@ -173,6 +188,23 @@ export const Configuracion = ({ setState }) => {
         console.log(val)
         _product[`${name}`] = val;
         setClient(_product);
+        console.log(_product)
+    }
+    const onInputChangeDate = (e, name) => {
+        const val = e.value
+        let _product = { ...client };
+        console.log(val)
+        _product[`${name}`] = val.getFullYear()+"-"+(val.getMonth()+1)+"-"+val.getDate();
+        setClient(_product);
+        console.log(_product)
+    }
+    const onInputChangeBool = (e, name) => {
+        const val = e.checked 
+        let _product = { ...client };
+        console.log(val)
+        _product[`${name}`] = val;
+        setClient(_product);
+        console.log(_product)
     }
     const onInputNumberChange = (e, name) => {
         const val = e.value || 0;
@@ -192,7 +224,7 @@ export const Configuracion = ({ setState }) => {
                         <DataTable ref={dt} value={clients} selection={selectedProducts} onSelectionChange={(e) => setSelectedProducts(e.value)}
                             dataKey="cli_id" paginator rows={10} rowsPerPageOptions={[5, 10, 25]}
                             paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products"
+                            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} clients"
                             globalFilter={globalFilter}
                             header={header}>
                             <Column selectionMode="multiple" headerStyle={{ width: '3rem' }}></Column>
@@ -204,6 +236,7 @@ export const Configuracion = ({ setState }) => {
                             <Column field="cli_email" header="E-mail" sortable></Column>
                             <Column field="cli_phone" header="Teléfono" sortable></Column>
                             <Column field="cli_status" header="Estado" sortable></Column>
+                            <Column field="cli_payment_type_id" header="Tipo de pago" sortable></Column>
                             <Column body={actionBodyTemplate}></Column>
                         </DataTable>
                     </div>
@@ -211,48 +244,48 @@ export const Configuracion = ({ setState }) => {
                     <Dialog visible={productDialog} style={{ width: '450px' }} header="Detalles de clientes" modal className="p-fluid" footer={productDialogFooter} onHide={hideDialog}>
                         <div className="p-field">
                             <label htmlFor="cli_id_card">Cédula</label>
-                            <InputText id="cli_id_card" value={client.cli_id_card} onChange={(e) => onInputChange(e, 'cli_id_card')} required autoFocus className={classNames({ 'p-invalid': submitted && !product.name })} />
-                            {submitted && !product.nombre_producto && <small className="p-invalid">Nombre es requerido.</small>}
+                            <InputText id="cli_id_card" value={client.cli_id_card} onChange={(e) => onInputChange(e, 'cli_id_card')} required autoFocus className={classNames({ 'p-invalid': submitted && !client.cli_id_card })} />
+                            {submitted && !client.cli_id_card && <small className="p-invalid">Cedula es requerido.</small>}
                         </div>
                         <div className="p-field">
-                            <label htmlFor="descripcion">Descripción</label>
-                            <InputTextarea id="descripcion" value={product.descripcion} onChange={(e) => onInputChange(e, 'descripcion')} required rows={3} cols={20} />
+                            <label htmlFor="cli_name">Nombre</label>
+                            <InputText id="cli_name" value={client.cli_name} onChange={(e) => onInputChange(e, 'cli_name')} required autoFocus className={classNames({ 'p-invalid': submitted && !client.cli_name })} />
+                            {submitted && !client.cli_name && <small className="p-invalid">Cedula es requerido.</small>}
                         </div>
                         <div className="p-field">
-                            <label htmlFor="Genero">Genero</label>
-                            <Dropdown id="id_genero" value={product.id_genero} options={data.generos} onChange={(e) => onInputChange(e, 'id_genero')} optionLabel="nombre_genero" className="p-invalid" />
-                            {submitted && !product.id_genero.id_genero && <small className="p-invalid">Guenero es requerido.</small>}
+                            <label htmlFor="cli_born_date">Fecha nacimiento</label>
+                            <Calendar id="cli_born_date" dateFormat="yy-mm-dd"  value={client.cli_born_date} onChange={(e) => onInputChangeDate(e,'cli_born_date')} showIcon />
+                            {submitted && !client.cli_born_date && <small className="p-invalid">Fecha de Nacimiento es requerida es requerido.</small>}
                         </div>
                         <div className="p-field">
-                            <label htmlFor="Tipo">Tipo</label>
-                            <Dropdown id="id_tipo" value={product.id_tipo} options={data.tipo_productos} onChange={(e) => onInputChange(e, 'id_tipo')} optionLabel="nombre_tipo" className="p-invalid" />
-                            {submitted && !product.id_tipo.id_tipo && <small className="p-invalid">Tipo es requerido.</small>}
+                            <label htmlFor="cli_address">Dirección</label>
+                            <InputText id="cli_address" value={client.cli_address} onChange={(e) => onInputChange(e, 'cli_address')} required autoFocus className={classNames({ 'p-invalid': submitted && !client.cli_address })} />
+                            {submitted && !client.cli_address && <small className="p-invalid">Dirección es requerido.</small>}
                         </div>
                         <div className="p-field">
-                            <label htmlFor="Talla">Talla</label>
-                            <Dropdown id="id_talla" value={product.id_talla} options={data.tallas} onChange={(e) => onInputChange(e, 'id_talla')} optionLabel="nombre_talla" className="p-invalid" />
-                            {submitted && !product.id_talla.id_talla && <small className="p-invalid">Talla es requerido.</small>}
+                            <label htmlFor="cli_email">E-mail</label>
+                            <InputText id="cli_email" value={client.cli_email} onChange={(e) => onInputChange(e, 'cli_email')} required autoFocus className={classNames({ 'p-invalid': submitted && !client.cli_email })} />
+                            {submitted && !client.cli_email && <small className="p-invalid">E-mail es requerido.</small>}
                         </div>
                         <div className="p-field">
-                            <label htmlFor="Imagen">Imagen</label>
-                            <InputTextarea id="imagen" value={product.imagen} onChange={(e) => onInputChange(e, 'imagen')} required rows={3} cols={20} />
+                            <label htmlFor="cli_phone">Teléfono</label>
+                            <InputText id="cli_phone" value={client.cli_phone} onChange={(e) => onInputChange(e, 'cli_phone')} required autoFocus className={classNames({ 'p-invalid': submitted && !client.cli_phone })} />
+                            {submitted && !client.cli_phone && <small className="p-invalid">Teléfono es requerido.</small>}
                         </div>
-                        <div className="p-formgrid p-grid">
-                            <div className="p-field p-col">
-                                <label htmlFor="precio">Precio</label>
-                                <InputNumber id="precio" value={product.precio} onValueChange={(e) => onInputNumberChange(e, 'precio')} mode="currency" currency="USD" locale="en-US" />
-                            </div>
-                            <div className="p-field p-col">
-                                <label htmlFor="cantidad">Cantidad</label>
-                                <InputNumber id="cantidad" value={product.cantidad} min={0} onValueChange={(e) => onInputNumberChange(e, 'cantidad')} integeronly />
-                            </div>
+                        <div className="p-field">
+                            <label htmlFor="payments_type">Tipo de  Pago</label>
+                            <Dropdown id="payments_type" value={client.payments_type} options={payment_types} onChange={(e) => onInputChange(e, 'payments_type')} optionLabel="pt_value" className="p-invalid" />
+                            {submitted && !client.payments_type && <small className="p-invalid">Tipo de pago es requerido.</small>}
+                        </div>
+                        <div className="p-field-checkbox">
+                            <Checkbox id="cli_status" checked={client.cli_status} onChange={e => onInputChangeBool(e,'cli_status')} />
+                            <label htmlFor="cli_status">Estado</label>
                         </div>
                     </Dialog>
-
                     <Dialog visible={deleteProductDialog} style={{ width: '450px' }} header="Confirm" modal footer={deleteProductDialogFooter} onHide={hideDeleteProductDialog}>
                         <div className="confirmation-content">
                             <i className="pi pi-exclamation-triangle p-mr-3" style={{ fontSize: '2rem' }} />
-                            {product && <span>Esta seguro de querer eliminar <b>{product.nombre_producto}</b>?</span>}
+                            {client && <span>Esta seguro de querer eliminar <b>{client.cli_id_card}</b>?</span>}
                         </div>
                     </Dialog>
                 </div>}
