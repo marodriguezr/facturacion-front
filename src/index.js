@@ -3,19 +3,19 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-import {configureStore} from "./redux/store/configureStore.js";
-import { Provider } from "react-redux";
 import { BrowserRouter as Router } from "react-router-dom";
 
-const store = configureStore();
+import "primereact/resources/themes/saga-blue/theme.css";
+import "primereact/resources/primereact.min.css";
+import "primeicons/primeicons.css";
+import 'primeflex/primeflex.css';
+
 
 ReactDOM.render(
   <React.StrictMode>
-    <Provider store={store}>
       <Router>
         <App />
       </Router>
-    </Provider>
   </React.StrictMode>,
   document.getElementById('root')
 );

@@ -10,7 +10,7 @@ export const Module1Router = () => {
 
     return (
     <Switch>
-        <Route exact path={`${match.path}/nonDef`}>
+        <Route exact path={`${match.path}/`}>
             <h1>Non Def</h1>
         </Route>
         <Route exact path={`${match.path}`}>
