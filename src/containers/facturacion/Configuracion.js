@@ -1,3 +1,5 @@
+
+
 import { useState, useRef, useEffect } from "react";
 import { billingAPI } from "../../../src/services/billingAPI.js";
 import classNames from 'classnames';
@@ -22,7 +24,7 @@ export const Configuracion = ({ setState }) => {
         cli_cli_id: null,
         cli_id_card: "",
         cli_name: "",
-        cli_born_date: null,
+        cli_born_date: new Date(),
         cli_address: "",
         cli_email: "",
         cli_phone: "",
@@ -63,12 +65,12 @@ export const Configuracion = ({ setState }) => {
 
 
     const createClient = async () => {
-        const data = await (billingAPI.post(`clients/crearNuevoCliente/?cli_id_card=${client.cli_id_card}&cli_name=${client.cli_name}&cli_born_date=${client.cli_born_date}&cli_address=${client.cli_address}&cli_email=${client.cli_email}&cli_phone=${client.cli_phone}&cli_status=${client.cli_status}&cli_client_type_id=${client.cli_payment_type_id}`));
+        const data = await (billingAPI.post(`clients/crearNuevoCliente/?cli_id_card=${client.cli_id_card}&cli_name=${client.cli_name}&cli_born_date=${client.cli_born_date}&cli_address=${client.cli_address}&cli_email=${client.cli_email}&cli_phone=${client.cli_phone}&cli_status=${client.cli_status}&cli_payment_type_id=${client.cli_payment_type_id}`));
         toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Product Updated', life: 3000 });
     };
 
     const updateClient = async (client) => {
-        const data = await (billingAPI.put(`clients/actualizarCliente/${client.cli_id}/?cli_id_card=${client.cli_id_card}&cli_name=${client.cli_name}&cli_born_date=${client.cli_born_date}&cli_address=${client.cli_address}&cli_email=${client.cli_email}&cli_phone=${client.cli_phone}&cli_status=${client.cli_status}&cli_client_type_id=${client.cli_payment_type_id}`));
+        const data = await (billingAPI.put(`clients/actualizarCliente/${client.cli_id}/?cli_id_card=${client.cli_id_card}&cli_name=${client.cli_name}&cli_born_date=${client.cli_born_date}&cli_address=${client.cli_address}&cli_email=${client.cli_email}&cli_phone=${client.cli_phone}&cli_status=${client.cli_status}&cli_payment_type_id=${client.cli_payment_type_id}`));
         toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Product Updated', life: 3000 });
     };
 
@@ -85,7 +87,10 @@ export const Configuracion = ({ setState }) => {
     const saveClient = () => {
         setSubmitted(true);
         if (true) {
-            if (client.cli_id) {
+            client.cli_payment_type_id=client.payments_type.pt_id
+            console.log(client)
+            if (client.cli_id!=null) {
+                console.log("actualizando")
                 updateClient(client)
             }
             else {
@@ -184,34 +189,23 @@ export const Configuracion = ({ setState }) => {
     );
     const onInputChange = (e, name) => {
         const val = (e.target && e.target.value) || '';
-        let _product = { ...client };
-        console.log(val)
+        let _product = { ...client };      
         _product[`${name}`] = val;
-        setClient(_product);
-        console.log(_product)
+        setClient(_product);        
     }
     const onInputChangeDate = (e, name) => {
-        const val = e.value
-        let _product = { ...client };
-        console.log(val)
-        _product[`${name}`] = val.getFullYear()+"-"+(val.getMonth()+1)+"-"+val.getDate();
-        setClient(_product);
-        console.log(_product)
+        const val = e.value        
+        let _product = { ...client };  
+        let fecha=val.getFullYear()+"-"+(val.getMonth()+1)+"-"+val.getDate()      
+        _product[`${name}`] ="2021-06-28"
+        setClient(_product);        
     }
     const onInputChangeBool = (e, name) => {
         const val = e.checked 
-        let _product = { ...client };
-        console.log(val)
+        let _product = { ...client };        
         _product[`${name}`] = val;
-        setClient(_product);
-        console.log(_product)
-    }
-    const onInputNumberChange = (e, name) => {
-        const val = e.value || 0;
-        let _product = { ...client };
-        _product[`${name}`] = val;
-        setClient(_product);
-    }
+        setClient(_product);        
+    } 
 
 
     return (
@@ -222,7 +216,7 @@ export const Configuracion = ({ setState }) => {
                     <div className="card">
                         <Toolbar className="p-mb-4" left={leftToolbarTemplate} right={rightToolbarTemplate}></Toolbar>
                         <DataTable ref={dt} value={clients} selection={selectedProducts} onSelectionChange={(e) => setSelectedProducts(e.value)}
-                            dataKey="cli_id" paginator rows={10} rowsPerPageOptions={[5, 10, 25]}
+                            dataKey="cli_id" paginator rows={2} 
                             paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                             currentPageReportTemplate="Showing {first} to {last} of {totalRecords} clients"
                             globalFilter={globalFilter}
@@ -254,7 +248,7 @@ export const Configuracion = ({ setState }) => {
                         </div>
                         <div className="p-field">
                             <label htmlFor="cli_born_date">Fecha nacimiento</label>
-                            <Calendar id="cli_born_date" dateFormat="yy-mm-dd"  value={client.cli_born_date} onChange={(e) => onInputChangeDate(e,'cli_born_date')} showIcon />
+                            <Calendar id="cli_born_date" dateFormat="yy-mm-dd"  value={new Date(client.cli_born_date)} onChange={(e) => onInputChangeDate(e,'cli_born_date')} showIcon />
                             {submitted && !client.cli_born_date && <small className="p-invalid">Fecha de Nacimiento es requerida es requerido.</small>}
                         </div>
                         <div className="p-field">
