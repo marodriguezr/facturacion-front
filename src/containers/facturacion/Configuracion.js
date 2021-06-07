@@ -55,8 +55,7 @@ export const Configuracion = ({ setState }) => {
 
     const getAllClients = async () => {
         const data = await (billingAPI.get("clients/getAll"));
-        setClients(data.data.clientsAll);
-        console.log(data.data.clientsAll)
+        setClients(data.data.clientsAll);        
     };
     const getAllPaymentsTypes = async () => {
         const data = await (billingAPI.get("paymentsTypes"));
@@ -86,15 +85,15 @@ export const Configuracion = ({ setState }) => {
 
     const saveClient = () => {
         setSubmitted(true);
-        if (true) {
-            client.cli_payment_type_id = client.payments_type.pt_id
-            console.log(client)
-            if (client.cli_id != null) {
-                console.log("actualizando")
+        if (client.cli_id_card.trim() && client.cli_name.trim() && client.cli_address.trim() && client.cli_email.trim() && client.cli_phone.trim() && client.payments_type.pt_id!=0) {
+            client.cli_payment_type_id = client.payments_type.pt_id           
+            if (client.cli_id != null) {               
                 updateClient(client)
+                getAllClients();
             }
             else {
                 createClient();
+                getAllClients();
             }
             setProductDialog(false);
             getAllClients();
@@ -152,6 +151,7 @@ export const Configuracion = ({ setState }) => {
         const response = await billingAPI.delete(`clients/EliminarCliente/${client.cli_id}`);
         setDeleteProductDialog(false);
         setClient(emptyClient);
+        getAllClients()
         toast.current.show({ severity: 'success', summary: 'Suc cessful', detail: 'Product Deleted', life: 3000 });
     }
     const deleteProductDialogFooter = (
@@ -232,7 +232,7 @@ export const Configuracion = ({ setState }) => {
                             <Column field="cli_email" header="E-mail" sortable></Column>
                             <Column field="cli_phone" header="Teléfono" sortable></Column>
                             <Column header="Estado" body={EstadoBodyTemplate}></Column>
-                            <Column field="cli_payment_type_id" header="Tipo de pago" sortable></Column>
+                            <Column field="payments_type.pt_value" header="Tipo de pago" sortable></Column>
                             <Column body={actionBodyTemplate}></Column>
                         </DataTable>
                     </div>
@@ -265,7 +265,7 @@ export const Configuracion = ({ setState }) => {
                         </div>
                         <div className="p-field">
                             <label htmlFor="cli_phone">Teléfono</label>
-                            <InputText id="cli_phone" value={client.cli_phone} onChange={(e) => onInputChange(e, 'cli_phone')} required autoFocus className={classNames({ 'p-invalid': submitted && !client.cli_phone })} />
+                            <InputNumber id="cli_phone" min="0" value={client.cli_phone} onChange={(e) => onInputChange(e, 'cli_phone')} required autoFocus className={classNames({ 'p-invalid': submitted && !client.cli_phone })} />
                             {submitted && !client.cli_phone && <small className="p-invalid">Teléfono es requerido.</small>}
                         </div>
                         <div className="p-field">
