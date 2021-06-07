@@ -15,7 +15,7 @@ import { InputText } from 'primereact/inputtext';
 import { Dropdown } from 'primereact/dropdown';
 import { ProgressSpinner } from 'primereact/progressspinner';
 import { Calendar } from 'primereact/calendar';
-import {Checkbox} from 'primereact/checkbox';
+import { Checkbox } from 'primereact/checkbox';
 import "../../assets/css/main.css";
 
 
@@ -87,9 +87,9 @@ export const Configuracion = ({ setState }) => {
     const saveClient = () => {
         setSubmitted(true);
         if (true) {
-            client.cli_payment_type_id=client.payments_type.pt_id
+            client.cli_payment_type_id = client.payments_type.pt_id
             console.log(client)
-            if (client.cli_id!=null) {
+            if (client.cli_id != null) {
                 console.log("actualizando")
                 updateClient(client)
             }
@@ -189,24 +189,26 @@ export const Configuracion = ({ setState }) => {
     );
     const onInputChange = (e, name) => {
         const val = (e.target && e.target.value) || '';
-        let _product = { ...client };      
+        let _product = { ...client };
         _product[`${name}`] = val;
-        setClient(_product);        
+        setClient(_product);
     }
     const onInputChangeDate = (e, name) => {
-        const val = e.value        
-        let _product = { ...client };  
-        let fecha=val.getFullYear()+"-"+(val.getMonth()+1)+"-"+val.getDate()      
-        _product[`${name}`] =fecha
-        setClient(_product);        
+        const val = e.value
+        let _product = { ...client };
+        let fecha = val.getFullYear() + "-" + (val.getMonth() + 1) + "-" + val.getDate()
+        _product[`${name}`] = fecha
+        setClient(_product);
     }
     const onInputChangeBool = (e, name) => {
-        const val = e.checked 
-        let _product = { ...client };        
+        const val = e.checked
+        let _product = { ...client };
         _product[`${name}`] = val;
-        setClient(_product);        
-    } 
-
+        setClient(_product);
+    }
+    const EstadoBodyTemplate = (rowData) => {
+        return <div className="p-text-center">{rowData.cli_status+""}</div>
+    }
 
     return (
         <>
@@ -216,7 +218,7 @@ export const Configuracion = ({ setState }) => {
                     <div className="card">
                         <Toolbar className="p-mb-4" left={leftToolbarTemplate} right={rightToolbarTemplate}></Toolbar>
                         <DataTable ref={dt} value={clients} selection={selectedProducts} onSelectionChange={(e) => setSelectedProducts(e.value)}
-                            dataKey="cli_id" paginator rows={2} 
+                            dataKey="cli_id" paginator rows={2}
                             paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                             currentPageReportTemplate="Showing {first} to {last} of {totalRecords} clients"
                             globalFilter={globalFilter}
@@ -229,7 +231,7 @@ export const Configuracion = ({ setState }) => {
                             <Column field="cli_address" header="Dirección" sortable></Column>
                             <Column field="cli_email" header="E-mail" sortable></Column>
                             <Column field="cli_phone" header="Teléfono" sortable></Column>
-                            <Column field="cli_status" header="Estado" sortable></Column>
+                            <Column header="Estado" body={EstadoBodyTemplate}></Column>
                             <Column field="cli_payment_type_id" header="Tipo de pago" sortable></Column>
                             <Column body={actionBodyTemplate}></Column>
                         </DataTable>
@@ -248,7 +250,7 @@ export const Configuracion = ({ setState }) => {
                         </div>
                         <div className="p-field">
                             <label htmlFor="cli_born_date">Fecha nacimiento</label>
-                            <Calendar id="cli_born_date" dateFormat="yy-mm-dd"  value={new Date(client.cli_born_date)} onChange={(e) => onInputChangeDate(e,'cli_born_date')} showIcon />
+                            <Calendar id="cli_born_date" dateFormat="yy-mm-dd" value={(new Date(new Date(client.cli_born_date).getFullYear() + "-" + new Date(client.cli_born_date).getMonth() + "-" + (new Date(client.cli_born_date).getDate() + 1)))} onChange={(e) => onInputChangeDate(e, 'cli_born_date')} showIcon />
                             {submitted && !client.cli_born_date && <small className="p-invalid">Fecha de Nacimiento es requerida es requerido.</small>}
                         </div>
                         <div className="p-field">
@@ -272,7 +274,7 @@ export const Configuracion = ({ setState }) => {
                             {submitted && !client.payments_type && <small className="p-invalid">Tipo de pago es requerido.</small>}
                         </div>
                         <div className="p-field-checkbox">
-                            <Checkbox id="cli_status" checked={client.cli_status} onChange={e => onInputChangeBool(e,'cli_status')} />
+                            <Checkbox id="cli_status" checked={client.cli_status} onChange={e => onInputChangeBool(e, 'cli_status')} />
                             <label htmlFor="cli_status">Estado</label>
                         </div>
                     </Dialog>
