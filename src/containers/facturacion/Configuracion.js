@@ -17,6 +17,7 @@ import { ProgressSpinner } from 'primereact/progressspinner';
 import { Calendar } from 'primereact/calendar';
 import { Checkbox } from 'primereact/checkbox';
 import "../../assets/css/main.css";
+import { InputMask } from 'primereact/inputmask';
 
 
 export const Configuracion = ({ setState }) => {
@@ -233,6 +234,7 @@ export const Configuracion = ({ setState }) => {
     const onInputChange = (e, name) => {
         const val = (e.target && e.target.value) || '';
         let _product = { ...client };
+        console.log(val)
         _product[`${name}`] = val;
         setClient(_product);
     }
@@ -266,7 +268,6 @@ export const Configuracion = ({ setState }) => {
                             currentPageReportTemplate="Showing {first} to {last} of {totalRecords} clients"
                             globalFilter={globalFilter}
                             header={header}>
-                            <Column selectionMode="multiple" headerStyle={{ width: '3rem' }}></Column>
                             <Column field="cli_id" header="Código" sortable></Column>
                             <Column field="cli_id_card" header="Cédula" sortable></Column>
                             <Column field="cli_name" header="Nombre" sortable></Column>
@@ -293,7 +294,7 @@ export const Configuracion = ({ setState }) => {
                         </div>
                         <div className="p-field">
                             <label htmlFor="cli_born_date">Fecha nacimiento</label>
-                            <Calendar id="cli_born_date" dateFormat="yy-mm-dd" value={(new Date(new Date(client.cli_born_date).getFullYear() + "-" + new Date(client.cli_born_date).getMonth() + "-" + (new Date(client.cli_born_date).getDate() + 1)))} onChange={(e) => onInputChangeDate(e, 'cli_born_date')} showIcon />
+                            <Calendar id="cli_born_date" dateFormat="yy-mm-dd" value={(new Date(new Date(client.cli_born_date).getFullYear() + "-" + (new Date(client.cli_born_date).getMonth() + 1) + "-" + (new Date(client.cli_born_date).getDate() + 1)))} onChange={(e) => onInputChangeDate(e, 'cli_born_date')} showIcon />
                             {submitted && !client.cli_born_date && <small className="p-invalid">Fecha de Nacimiento es requerida es requerido.</small>}
                         </div>
                         <div className="p-field">
@@ -308,7 +309,7 @@ export const Configuracion = ({ setState }) => {
                         </div>
                         <div className="p-field">
                             <label htmlFor="cli_phone">Teléfono</label>
-                            <InputText maxLength="10" id="cli_phone" value={client.cli_phone} onChange={(e) => onInputChange(e, 'cli_phone')} required autoFocus className={classNames({ 'p-invalid': submitted && !client.cli_phone })} />
+                            <InputMask id="cli_phone" mask="9999999999" maxlength="10" value={client.cli_phone} onChange={(e) => onInputChange(e, 'cli_phone')}></InputMask>
                             {submitted && !client.cli_phone && <small className="p-invalid">Teléfono es requerido.</small>}
                         </div>
                         <div className="p-field">
