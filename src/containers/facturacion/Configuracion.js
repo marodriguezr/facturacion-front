@@ -55,7 +55,7 @@ export const Configuracion = ({ setState }) => {
 
     const getAllClients = async () => {
         const data = await (billingAPI.get("clients/getAll"));
-        setClients(data.data.clientsAll);        
+        setClients(data.data.clientsAll);
     };
     const getAllPaymentsTypes = async () => {
         const data = await (billingAPI.get("paymentsTypes"));
@@ -85,18 +85,29 @@ export const Configuracion = ({ setState }) => {
 
     const saveClient = () => {
         setSubmitted(true);
-        if (client.cli_id_card.trim() && client.cli_name.trim() && client.cli_address.trim() && client.cli_email.trim() && client.cli_phone.trim() && client.payments_type.pt_id!=0) {
-            client.cli_payment_type_id = client.payments_type.pt_id           
-            if (client.cli_id != null) {               
-                updateClient(client)
-                getAllClients();
+        if (client.cli_id_card.trim() && client.cli_name.trim() && client.cli_address.trim() && client.cli_email.trim() && client.cli_phone.trim() && client.payments_type.pt_id != 0) {
+            if (validarCedula()) {
+                if (validarEmail()) {
+                    client.cli_payment_type_id = client.payments_type.pt_id
+                    if (client.cli_id != null) {
+                        updateClient(client)
+                        getAllClients();
+                    }
+                    else {
+                        createClient();
+                        getAllClients();
+                    }
+                    setProductDialog(false);
+                    getAllClients();
+                } else {
+                    toast.current.show({ severity: 'error', summary: 'Error Message', detail: 'Correo Incorrecto', life: 3000 });
+                }
+            } else {
+                toast.current.show({ severity: 'error', summary: 'Error Message', detail: 'Cédula Incorrecta', life: 3000 });
             }
-            else {
-                createClient();
-                getAllClients();
-            }
-            setProductDialog(false);
-            getAllClients();
+
+        } else {
+            toast.current.show({ severity: 'error', summary: 'Error Message', detail: 'Campo vacios', life: 3000 });
         }
     }
 
@@ -117,7 +128,39 @@ export const Configuracion = ({ setState }) => {
             </>
         );
     }
+    function validarCedula() {
+        var cad = client.cli_id_card.trim();
+        var total = 0;
+        var longitud = cad.length;
+        var longcheck = longitud - 1;
 
+        if (cad !== "" && longitud === 10) {
+            for (let i = 0; i < longcheck; i++) {
+                if (i % 2 === 0) {
+                    var aux = cad.charAt(i) * 2;
+                    if (aux > 9) aux -= 9;
+                    total += aux;
+                } else {
+                    total += parseInt(cad.charAt(i)); // parseInt o concatenará en lugar de sumar
+                }
+            }
+
+            total = total % 10 ? 10 - total % 10 : 0;
+
+            if (cad.charAt(longitud - 1) == total) {
+                return true
+            } else {
+                return false
+            }
+        }
+    }
+    function validarEmail() {
+        if (/^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i.test(client.cli_email)) {
+            return true
+        } else {
+            return false
+        }
+    }
     const exportCSV = () => {
         dt.current.exportCSV();
     }
@@ -207,7 +250,7 @@ export const Configuracion = ({ setState }) => {
         setClient(_product);
     }
     const EstadoBodyTemplate = (rowData) => {
-        return <div className="p-text-center">{rowData.cli_status+""}</div>
+        return <div className="p-text-center">{rowData.cli_status + ""}</div>
     }
 
     return (
@@ -240,7 +283,7 @@ export const Configuracion = ({ setState }) => {
                     <Dialog visible={productDialog} style={{ width: '450px' }} header="Detalles de clientes" modal className="p-fluid" footer={productDialogFooter} onHide={hideDialog}>
                         <div className="p-field">
                             <label htmlFor="cli_id_card">Cédula</label>
-                            <InputText id="cli_id_card" value={client.cli_id_card} onChange={(e) => onInputChange(e, 'cli_id_card')} required autoFocus className={classNames({ 'p-invalid': submitted && !client.cli_id_card })} />
+                            <InputText id="cli_id_card" maxLength="10" value={client.cli_id_card} onChange={(e) => onInputChange(e, 'cli_id_card')} required autoFocus className={classNames({ 'p-invalid': submitted && !client.cli_id_card })} />
                             {submitted && !client.cli_id_card && <small className="p-invalid">Cedula es requerido.</small>}
                         </div>
                         <div className="p-field">
@@ -265,13 +308,13 @@ export const Configuracion = ({ setState }) => {
                         </div>
                         <div className="p-field">
                             <label htmlFor="cli_phone">Teléfono</label>
-                            <InputNumber id="cli_phone" min="0" value={client.cli_phone} onChange={(e) => onInputChange(e, 'cli_phone')} required autoFocus className={classNames({ 'p-invalid': submitted && !client.cli_phone })} />
+                            <InputText maxLength="10" id="cli_phone" value={client.cli_phone} onChange={(e) => onInputChange(e, 'cli_phone')} required autoFocus className={classNames({ 'p-invalid': submitted && !client.cli_phone })} />
                             {submitted && !client.cli_phone && <small className="p-invalid">Teléfono es requerido.</small>}
                         </div>
                         <div className="p-field">
                             <label htmlFor="payments_type">Tipo de  Pago</label>
                             <Dropdown id="payments_type" value={client.payments_type} options={payment_types} onChange={(e) => onInputChange(e, 'payments_type')} optionLabel="pt_value" className="p-invalid" />
-                            {submitted && !client.payments_type && <small className="p-invalid">Tipo de pago es requerido.</small>}
+                            {submitted && !client.payments_type.pt_id && <small className="p-invalid">Tipo de pago es requerido.</small>}
                         </div>
                         <div className="p-field-checkbox">
                             <Checkbox id="cli_status" checked={client.cli_status} onChange={e => onInputChangeBool(e, 'cli_status')} />
