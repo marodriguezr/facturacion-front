@@ -197,7 +197,7 @@ export const Configuracion = ({ setState }) => {
         const val = e.value        
         let _product = { ...client };  
         let fecha=val.getFullYear()+"-"+(val.getMonth()+1)+"-"+val.getDate()      
-        _product[`${name}`] ="2021-06-28"
+        _product[`${name}`] =fecha
         setClient(_product);        
     }
     const onInputChangeBool = (e, name) => {
