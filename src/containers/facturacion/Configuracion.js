@@ -1,3 +1,5 @@
+
+
 import { useState, useRef, useEffect } from "react";
 import { billingAPI } from "../../../src/services/billingAPI.js";
 import classNames from 'classnames';
@@ -6,6 +8,8 @@ import { Column } from 'primereact/column';
 import { Toast } from 'primereact/toast';
 import { Button } from 'primereact/button';
 import { Toolbar } from 'primereact/toolbar';
+import { InputTextarea } from 'primereact/inputtextarea';
+import { InputNumber } from 'primereact/inputnumber';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
 import { Dropdown } from 'primereact/dropdown';
@@ -65,8 +69,9 @@ export const Configuracion = ({ setState }) => {
             const data = await (billingAPI.post(`clients/crearNuevoCliente/?cli_id_card=${client.cli_id_card}&cli_name=${client.cli_name}&cli_born_date=${client.cli_born_date}&cli_address=${client.cli_address}&cli_email=${client.cli_email}&cli_phone=${client.cli_phone}&cli_status=${client.cli_status}&cli_payment_type_id=${client.cli_payment_type_id}`));
             toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Product Updated', life: 3000 });
         } catch (error) {
-            toast.current.show({ severity: 'warning', summary: 'Advertencia', detail: 'Ha ocurrido un error en la creación, probablemente la cédula, numero de teléfono o email ya existen.', life: 3000 });
+            toast.current.show({ severity: 'warn', summary: 'Advertencia', detail: 'Ha ocurrido un error en la creación, probablemente la cédula, numero de teléfono o email ya existen.', life: 3000 });
         }
+
     };
 
     const updateClient = async (client) => {
@@ -74,9 +79,8 @@ export const Configuracion = ({ setState }) => {
             const data = await (billingAPI.put(`clients/actualizarCliente/${client.cli_id}/?cli_id_card=${client.cli_id_card}&cli_name=${client.cli_name}&cli_born_date=${client.cli_born_date}&cli_address=${client.cli_address}&cli_email=${client.cli_email}&cli_phone=${client.cli_phone}&cli_status=${client.cli_status}&cli_payment_type_id=${client.cli_payment_type_id}`));
             toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Product Updated', life: 3000 });
         } catch (error) {
-            toast.current.show({ severity: 'warning', summary: 'Advertencia', detail: 'Ha ocurrido un error en la actualización, probablemente la cédula, numero de teléfono o email ya existen.', life: 3000 });
+            toast.current.show({ severity: 'warn', summary: 'Advertencia', detail: 'Ha ocurrido un error en la actualización, probablemente la cédula, numero de teléfono o email ya existen.', life: 3000 });
         }
-
     };
 
     const header = (
