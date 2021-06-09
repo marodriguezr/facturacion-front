@@ -7,9 +7,12 @@ import { InputNumber } from 'primereact/inputnumber';
 import { Button } from 'primereact/button';
 import { Toast } from 'primereact/toast';
 import { billingAPI } from "../../../services/billingAPI.js";
+import { useHistory, useRouteMatch } from "react-router-dom";
 
 
 export const ProductSelection = ({ productsState, selectedProductsState, selectedClientState }) => {
+    const history = useHistory();
+    const match = useRouteMatch();
     const toast = useRef(null);
     const [products, setProducts] = productsState;
     const [selectedProducts, setSelectedProducts] = selectedProductsState;
@@ -94,6 +97,7 @@ export const ProductSelection = ({ productsState, selectedProductsState, selecte
             await submitBillDetail(element.pro_stock, element.pro_pvp, element.pro_iva, billHeader.bh_id, element.pro_id);
         });
         showSuccess("Factura registrada con éxito.");
+        history.push(`/facturacion/viewBills`)
     };
 
     useEffect(() => {
@@ -136,7 +140,6 @@ export const ProductSelection = ({ productsState, selectedProductsState, selecte
                     <Column header="IVA" body={ivaBodyTemplate}></Column>
                     <Column header="Precio" field="pro_pvp"></Column>
                     <Column header="Stock" field="pro_stock"></Column>
-                    <Column selectionMode="multiple" headerStyle={{ width: '3rem' }}></Column>
                 </DataTable>}
             </div>
         </div>

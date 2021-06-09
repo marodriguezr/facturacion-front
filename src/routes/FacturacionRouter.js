@@ -8,6 +8,7 @@ import {
 import { Facturacion } from "../containers/facturacion/index.js";
 import { Configuracion } from "../containers/facturacion/Configuracion.js";
 import { CreateBill } from "../containers/facturacion/CreateBill.js";
+import { ReviewBills } from "../containers/facturacion/ReviewBills.js";
 import { NavigationBar } from "../components/facturacion/NavigationBar.js";
 import { useState } from "react";
 
@@ -30,7 +31,7 @@ export const FacturacionRouter = () => {
                     <CreateBill></CreateBill>
                 </Route>
                 <Route path={`${match.path}/viewBills`}>
-                    <h1>Bills</h1>
+                    <ReviewBills></ReviewBills>
                 </Route>
             </Switch>
         </>
