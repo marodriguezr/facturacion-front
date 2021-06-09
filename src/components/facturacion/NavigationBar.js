@@ -28,6 +28,22 @@ export const NavigationBar = () => {
                     icon: 'pi pi-fw pi-external-link'
                 }
             ]
+        },
+        {
+            label: "Administración",
+            icon: 'pi pi-fw pi-briefcase',
+            items: [
+                {
+                    label: "Registrar nueva factura",
+                    icon: "pi pi-fw pi-shopping-cart",
+                    command: () => {history.push(`${match.path}/createBill`)}
+                },
+                {
+                    label: "Revisar facturas",
+                    icon: "pi pi-fw pi-eye",
+                    command: () => {history.push(`${match.path}/viewBills`)}
+                }
+            ]
         }
     ];
 
