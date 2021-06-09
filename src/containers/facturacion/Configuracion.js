@@ -208,7 +208,7 @@ export const Configuracion = ({ setState }) => {
                         </DataTable>
                     </div>
 
-                    <Dialog visible={productDialog} style={{ width: '450px' }} header="Detalles de clientes" modal className="p-fluid" footer={productDialogFooter} onHide={hideDialog}>
+                    {/* <Dialog visible={productDialog} style={{ width: '450px' }} header="Detalles de clientes" modal className="p-fluid" footer={productDialogFooter} onHide={hideDialog}>
                         <div className="p-field">
                             <label htmlFor="cli_id_card">Cédula</label>
                             <InputText id="cli_id_card" value={client.cli_id_card} onChange={(e) => onInputChange(e, 'cli_id_card')} required autoFocus className={classNames({ 'p-invalid': submitted && !product.name })} />
@@ -254,7 +254,7 @@ export const Configuracion = ({ setState }) => {
                             <i className="pi pi-exclamation-triangle p-mr-3" style={{ fontSize: '2rem' }} />
                             {product && <span>Esta seguro de querer eliminar <b>{product.nombre_producto}</b>?</span>}
                         </div>
-                    </Dialog>
+                    </Dialog> */}
                 </div>}
         </>
     );

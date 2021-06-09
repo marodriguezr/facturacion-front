@@ -1,3 +1,3 @@
 import axios from "axios";
 
-export const inventoryAPI = axios.create({baseURL: "https://modulo-inventario-app.herokuapp.com/"});
+export const inventoryAPI = axios.create({baseURL: "http://localhost:8010/proxy"});
