@@ -1,5 +1,3 @@
-
-
 import { useState, useRef, useEffect } from "react";
 import { billingAPI } from "../../../src/services/billingAPI.js";
 import classNames from 'classnames';
@@ -8,8 +6,6 @@ import { Column } from 'primereact/column';
 import { Toast } from 'primereact/toast';
 import { Button } from 'primereact/button';
 import { Toolbar } from 'primereact/toolbar';
-import { InputTextarea } from 'primereact/inputtextarea';
-import { InputNumber } from 'primereact/inputnumber';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
 import { Dropdown } from 'primereact/dropdown';
@@ -65,13 +61,22 @@ export const Configuracion = ({ setState }) => {
 
 
     const createClient = async () => {
-        const data = await (billingAPI.post(`clients/crearNuevoCliente/?cli_id_card=${client.cli_id_card}&cli_name=${client.cli_name}&cli_born_date=${client.cli_born_date}&cli_address=${client.cli_address}&cli_email=${client.cli_email}&cli_phone=${client.cli_phone}&cli_status=${client.cli_status}&cli_payment_type_id=${client.cli_payment_type_id}`));
-        toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Product Updated', life: 3000 });
+        try {
+            const data = await (billingAPI.post(`clients/crearNuevoCliente/?cli_id_card=${client.cli_id_card}&cli_name=${client.cli_name}&cli_born_date=${client.cli_born_date}&cli_address=${client.cli_address}&cli_email=${client.cli_email}&cli_phone=${client.cli_phone}&cli_status=${client.cli_status}&cli_payment_type_id=${client.cli_payment_type_id}`));
+            toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Product Updated', life: 3000 });
+        } catch (error) {
+            toast.current.show({ severity: 'warning', summary: 'Advertencia', detail: 'Ha ocurrido un error en la creación, probablemente la cédula, numero de teléfono o email ya existen.', life: 3000 });
+        }
     };
 
     const updateClient = async (client) => {
-        const data = await (billingAPI.put(`clients/actualizarCliente/${client.cli_id}/?cli_id_card=${client.cli_id_card}&cli_name=${client.cli_name}&cli_born_date=${client.cli_born_date}&cli_address=${client.cli_address}&cli_email=${client.cli_email}&cli_phone=${client.cli_phone}&cli_status=${client.cli_status}&cli_payment_type_id=${client.cli_payment_type_id}`));
-        toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Product Updated', life: 3000 });
+        try {
+            const data = await (billingAPI.put(`clients/actualizarCliente/${client.cli_id}/?cli_id_card=${client.cli_id_card}&cli_name=${client.cli_name}&cli_born_date=${client.cli_born_date}&cli_address=${client.cli_address}&cli_email=${client.cli_email}&cli_phone=${client.cli_phone}&cli_status=${client.cli_status}&cli_payment_type_id=${client.cli_payment_type_id}`));
+            toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Product Updated', life: 3000 });
+        } catch (error) {
+            toast.current.show({ severity: 'warning', summary: 'Advertencia', detail: 'Ha ocurrido un error en la actualización, probablemente la cédula, numero de teléfono o email ya existen.', life: 3000 });
+        }
+
     };
 
     const header = (
@@ -281,7 +286,7 @@ export const Configuracion = ({ setState }) => {
                         </DataTable>
                     </div>
 
-                    {/* <Dialog visible={productDialog} style={{ width: '450px' }} header="Detalles de clientes" modal className="p-fluid" footer={productDialogFooter} onHide={hideDialog}>
+                    <Dialog visible={productDialog} style={{ width: '450px' }} header="Detalles de clientes" modal className="p-fluid" footer={productDialogFooter} onHide={hideDialog}>
                         <div className="p-field">
                             <label htmlFor="cli_id_card">Cédula</label>
                             <InputText id="cli_id_card" maxLength="10" value={client.cli_id_card} onChange={(e) => onInputChange(e, 'cli_id_card')} required autoFocus className={classNames({ 'p-invalid': submitted && !client.cli_id_card })} />
@@ -327,7 +332,7 @@ export const Configuracion = ({ setState }) => {
                             <i className="pi pi-exclamation-triangle p-mr-3" style={{ fontSize: '2rem' }} />
                             {client && <span>Esta seguro de querer eliminar <b>{client.cli_id_card}</b>?</span>}
                         </div>
-                    </Dialog> */}
+                    </Dialog>
                 </div>}
         </>
     );
