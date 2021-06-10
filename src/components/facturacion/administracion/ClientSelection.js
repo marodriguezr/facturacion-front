@@ -35,7 +35,7 @@ export const ClientSelection = ({ clientsState, selectedClientState }) => {
         const response = await billingAPI.get("clients/getByActivos");
         setClients(response.data.clientsAll);
     };
-    
+
     const getCurrentWritableBillCode = async () => {
         const response = await billingAPI.get("bills/currentWritableBillCode");
         setCurrentWritableBillCode(response.data.last);
@@ -55,7 +55,7 @@ export const ClientSelection = ({ clientsState, selectedClientState }) => {
     };
 
     const handlePaymentType = () => {
-        if (selectedClient.payments_type.pt_value.trim().toLowerCase() === ("credito" || "crédito")) {
+        if (selectedClient.payments_type.pt_value.trim().toLowerCase() === "credito" || "crédito") {
             return (
                 <>
                     <Dropdown className="p-d-flex" value={selectedClient.payments_type} options={paymentTypes} onChange={(e) => { setSelectedClient({ ...selectedClient, payments_type: e.value }); let currentClients = clients.slice(); currentClients.find((element) => element.cli_id === selectedClient.cli_id).payments_type = e.value; setClients(currentClients); }} optionLabel="pt_value" placeholder="Seleccione un tipo de pago" />

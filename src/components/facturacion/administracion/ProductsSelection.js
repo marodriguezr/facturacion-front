@@ -8,7 +8,7 @@ import { Button } from 'primereact/button';
 import { Toast } from 'primereact/toast';
 import { billingAPI } from "../../../services/billingAPI.js";
 import { useHistory, useRouteMatch } from "react-router-dom";
-
+import { Card } from 'primereact/card';
 
 export const ProductSelection = ({ productsState, selectedProductsState, selectedClientState }) => {
     const history = useHistory();
@@ -118,6 +118,11 @@ export const ProductSelection = ({ productsState, selectedProductsState, selecte
     return (<>
         <Toast ref={toast} />
         <div className="p-grid p-mt-2">
+            <div className="p-col-12">
+                <Card>
+                    {/* Totales, subtotal e iva de la factura. */}
+                </Card>
+            </div>
             <div className="p-col-5">
                 {products === null ? <ProgressSpinner /> : <DataTable value={products} paginator={true} rows={5} selection={selectedInternalProducts} onSelectionChange={(e) => setSelectedInternalProducts(e.value)}
                     dataKey="pro_id"
