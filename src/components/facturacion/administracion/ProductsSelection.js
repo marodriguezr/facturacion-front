@@ -8,7 +8,7 @@ import { Button } from 'primereact/button';
 import { Toast } from 'primereact/toast';
 import { billingAPI } from "../../../services/billingAPI.js";
 import { useHistory, useRouteMatch } from "react-router-dom";
-
+import { Card } from 'primereact/card';
 
 export const ProductSelection = ({ productsState, selectedProductsState, selectedClientState }) => {
     const history = useHistory();
@@ -91,7 +91,7 @@ export const ProductSelection = ({ productsState, selectedProductsState, selecte
             total += selectedProducts[index].pro_stock * selectedProducts[index].pro_pvp;
         }
         const billHeader = await submitBillHeader(
-            total, selectedClient.cli_id, selectedClient.cli_payment_type_id
+            total, selectedClient.cli_id, selectedClient.payments_type.pt_id
         );
         selectedProducts.forEach(async (element) => {
             await submitBillDetail(element.pro_stock, element.pro_pvp, element.pro_iva, billHeader.bh_id, element.pro_id);
@@ -102,6 +102,8 @@ export const ProductSelection = ({ productsState, selectedProductsState, selecte
 
     useEffect(() => {
         getAllProducts();
+        setSelectedProducts([]);
+        selectedClient === null && history.push("/facturacion/createBill");
     }, []);
 
     const ivaBodyTemplate = (rowData) => {
@@ -116,15 +118,20 @@ export const ProductSelection = ({ productsState, selectedProductsState, selecte
     return (<>
         <Toast ref={toast} />
         <div className="p-grid p-mt-2">
+            <div className="p-col-12">
+                <Card>
+                    {/* Totales, subtotal e iva de la factura. */}
+                </Card>
+            </div>
             <div className="p-col-5">
                 {products === null ? <ProgressSpinner /> : <DataTable value={products} paginator={true} rows={5} selection={selectedInternalProducts} onSelectionChange={(e) => setSelectedInternalProducts(e.value)}
                     dataKey="pro_id"
                 >
-                    <Column field="pro_nombre" header="Nombre"></Column>
-                    <Column header="IVA" body={ivaBodyTemplate}></Column>
-                    <Column header="Precio" field="pro_pvp"></Column>
-                    <Column header="Stock" field="pro_stock"></Column>
-                    <Column selectionMode="multiple" headerStyle={{ width: '3rem' }}></Column>
+                    <Column sortable={true} filter field="pro_nombre" header="Nombre"></Column>
+                    <Column sortable={true} header="IVA" body={ivaBodyTemplate}></Column>
+                    <Column sortable={true} header="Precio" field="pro_pvp"></Column>
+                    <Column sortable={true} header="Stock" field="pro_stock"></Column>
+                    <Column sortable={true} selectionMode="multiple" headerStyle={{ width: '3rem' }}></Column>
                 </DataTable>}
             </div>
             <div className="p-col-2">
