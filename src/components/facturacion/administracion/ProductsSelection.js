@@ -6,6 +6,7 @@ import { Column } from 'primereact/column';
 import { InputNumber } from 'primereact/inputnumber';
 import { Button } from 'primereact/button';
 import { Toast } from 'primereact/toast';
+import { Dialog } from 'primereact/dialog';
 import { billingAPI } from "../../../services/billingAPI.js";
 import { useHistory, useRouteMatch } from "react-router-dom";
 import { Card } from 'primereact/card';
@@ -17,6 +18,7 @@ export const ProductSelection = ({ productsState, selectedProductsState, selecte
     const [products, setProducts] = productsState;
     const [selectedProducts, setSelectedProducts] = selectedProductsState;
     const [selectedClient, setSelectedClient] = selectedClientState;
+    const [confirmBill, setconfirmBill] = useState(false);
     const [selectedInternalProducts, setSelectedInternalProducts] = useState(null);
     const [selectedStock, setSelectedStock] = useState(1);
 
@@ -98,6 +100,7 @@ export const ProductSelection = ({ productsState, selectedProductsState, selecte
         });
         showSuccess("Factura registrada con éxito.");
         history.push(`/facturacion/viewBills`)
+        setconfirmBill(false)
     };
 
     useEffect(() => {
@@ -111,9 +114,22 @@ export const ProductSelection = ({ productsState, selectedProductsState, selecte
             <p>{rowData.pro_iva ? "Si" : "No"}</p>
         )
     };
+    const hideConfirmBilDialog = () => {
+        setconfirmBill(false);
+    }
 
+    const confirmBillDialogFooter = (
+        <>
+            <Button label="No" icon="pi pi-times" className="p-button-text" onClick={hideConfirmBilDialog} />
+            <Button label="Yes" icon="pi pi-check" className="p-button-text" onClick={handleBilling} />
+        </>
+    );
 
+    
 
+    const upConfirmDialog = () => {
+        setconfirmBill(true);
+    }
 
     return (<>
         <Toast ref={toast} />
@@ -138,7 +154,7 @@ export const ProductSelection = ({ productsState, selectedProductsState, selecte
                 <InputNumber min={1} id="horizontal" value={selectedStock} onValueChange={(e) => setSelectedStock(e.value)} showButtons buttonLayout="horizontal" step={1}
                     decrementButtonClassName="p-button-danger" incrementButtonClassName="p-button-success" incrementButtonIcon="pi pi-plus" decrementButtonIcon="pi pi-minus" />
                 <Button className="p-mt-2" label="Agregar" icon="pi pi-plus" onClick={handleAddProducts} />
-                <Button className="p-mt-2" label="Facturar" icon="pi pi-plus" onClick={handleBilling} />
+                <Button className="p-mt-2" label="Facturar" icon="pi pi-plus" onClick={upConfirmDialog} />
             </div>
             <div className="p-col-5">
                 {selectedProducts.length === 0 ? <h1>Agregue algunos productos para continuar</h1> : <DataTable value={selectedProducts} paginator={true} rows={5}
@@ -147,6 +163,12 @@ export const ProductSelection = ({ productsState, selectedProductsState, selecte
                     <Column header="IVA" body={ivaBodyTemplate}></Column>
                     <Column header="Precio" field="pro_pvp"></Column>
                     <Column header="Stock" field="pro_stock"></Column>
+                    <Dialog visible={confirmBill} style={{ width: '450px' }} header="Confirm" modal footer={confirmBillDialogFooter} onHide={hideConfirmBilDialog}>
+                        <div className="confirmation-content">
+                            <i className="pi pi-exclamation-triangle p-mr-3" style={{ fontSize: '2rem' }} />
+                            {<span>¿Esta seguro de realizar la compra?</span>}
+                        </div>
+                    </Dialog>
                 </DataTable>}
             </div>
         </div>
