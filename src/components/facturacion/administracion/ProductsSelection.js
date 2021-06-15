@@ -8,12 +8,11 @@ import { Button } from 'primereact/button';
 import { Toast } from 'primereact/toast';
 import { Dialog } from 'primereact/dialog';
 import { billingAPI } from "../../../services/billingAPI.js";
-import { useHistory, useRouteMatch } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import { Card } from 'primereact/card';
 
 export const ProductSelection = ({ productsState, selectedProductsState, selectedClientState }) => {
     const history = useHistory();
-    const match = useRouteMatch();
     const toast = useRef(null);
     const [products, setProducts] = productsState;
     const [selectedProducts, setSelectedProducts] = selectedProductsState;
