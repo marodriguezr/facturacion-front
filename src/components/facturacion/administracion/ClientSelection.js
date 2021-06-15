@@ -16,25 +16,22 @@ export const ClientSelection = ({ clientsState, selectedClientState }) => {
     const [selectedClient, setSelectedClient] = selectedClientState;
     const [paymentTypes, setPaymentTypes] = useState([]);
 
+    const getAllClients = async () => {
+        const response = await billingAPI.get("clients/getByActivos");
+        setClients(response.data.clientsAll);
+    };
+
+
     useEffect(() => {
         getAllClients();
         getAllPaymentTypes();
         setSelectedClient(null);
         getCurrentWritableBillCode();
-    }, []);
+    }, [setSelectedClient]);
 
     const showWarn = (message = "") => {
         toast.current.show({ severity: 'warn', summary: 'Advertencia', detail: message, life: 3000 });
     }
-
-    const showSuccess = (message = "") => {
-        toast.current.show({ severity: 'success', summary: 'Éxito', detail: message, life: 3000 });
-    }
-
-    const getAllClients = async () => {
-        const response = await billingAPI.get("clients/getByActivos");
-        setClients(response.data.clientsAll);
-    };
 
     const getCurrentWritableBillCode = async () => {
         const response = await billingAPI.get("bills/currentWritableBillCode");

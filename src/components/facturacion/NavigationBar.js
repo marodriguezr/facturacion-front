@@ -5,7 +5,6 @@ export const NavigationBar = () => {
     const history = useHistory();
     const match = useRouteMatch();
 
-    console.log(match);
     const items = [
         {
             label: 'Configuración',
