@@ -6,9 +6,12 @@ import { Column } from 'primereact/column';
 import { InputNumber } from 'primereact/inputnumber';
 import { Button } from 'primereact/button';
 import { Toast } from 'primereact/toast';
+import { Dialog } from 'primereact/dialog';
 import { billingAPI } from "../../../services/billingAPI.js";
 import { useHistory, useRouteMatch } from "react-router-dom";
 import { Card } from 'primereact/card';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 export const ProductSelection = ({ productsState, selectedProductsState, selectedClientState }) => {
     const history = useHistory();
@@ -17,6 +20,7 @@ export const ProductSelection = ({ productsState, selectedProductsState, selecte
     const [products, setProducts] = productsState;
     const [selectedProducts, setSelectedProducts] = selectedProductsState;
     const [selectedClient, setSelectedClient] = selectedClientState;
+    const [confirmBill, setconfirmBill] = useState(false);
     const [selectedInternalProducts, setSelectedInternalProducts] = useState(null);
     const [selectedStock, setSelectedStock] = useState(1);
 
@@ -56,12 +60,15 @@ export const ProductSelection = ({ productsState, selectedProductsState, selecte
             }
 
             let currentSelectedProduct = currentSelectedProducts.find((e) => e.pro_id === element.pro_id);
+           
             if (!(currentSelectedProduct === undefined)) {
                 currentSelectedProduct.pro_stock += selectedStock;
+               
             } else {
                 let toAddProduct = { ...element };
                 toAddProduct.pro_stock = selectedStock;
                 currentSelectedProducts.push(toAddProduct);
+                
             }
         });
         setProducts(currentProducts);
@@ -97,8 +104,69 @@ export const ProductSelection = ({ productsState, selectedProductsState, selecte
             await submitBillDetail(element.pro_stock, element.pro_pvp, element.pro_iva, billHeader.bh_id, element.pro_id);
         });
         showSuccess("Factura registrada con éxito.");
+        generateFacturasReport (billHeader,selectedProducts,total)
         history.push(`/facturacion/viewBills`)
+        setconfirmBill(false)
     };
+
+    const total_pvpBodyTemplate=(rowData)=>{ 
+        return (<p>{rowData.pro_stock*rowData.pro_pvp}</p>)
+    };
+
+    const generateFacturasReport = (billHeader,selectedProducts,total) => {
+
+        
+        var doc = new jsPDF('p', 'pt');
+        doc.setFontSize(20)
+        doc.setFont('helvetica','bold');
+        doc.text(200, 50, 'Factura')
+
+        doc.setFontSize(10)
+        doc.text(20, 80, 'Nro. Factura:')
+        doc.text(90, 80, billHeader.bh_bill_code)
+
+        const tiempoTranscurrido = Date.now();
+        const hoy = new Date(tiempoTranscurrido);
+        doc.setFontSize(10)
+        doc.text(20,100,'Fecha: ')
+        doc.setFont('helvetica','normal')
+        doc.text(70,100, hoy.toLocaleDateString())
+
+        doc.text(20, 120, 'Nombre del cliente:')
+        doc.text(110, 120, selectedClient.cli_name+"")
+
+        doc.text(20, 140, 'Cédula:')
+        doc.text(70, 140, selectedClient.cli_id_card+"")
+
+        doc.text(20, 160, 'Celular:')
+        doc.text(70, 160, selectedClient.cli_phone+"")
+
+        doc.text(20, 180, 'Correo electrónico:')
+        doc.text(110, 180, selectedClient.cli_email+"")
+
+        doc.text(20, 200, 'Dirección:')
+        doc.text(70, 200,selectedClient.cli_address+"")
+
+        doc.text(400, 660, 'Subtotal:')
+        doc.text(455, 660, total-(total*0.12) + "")
+        doc.text(400, 670, 'IVA:')
+        doc.text(455, 670, (total*0.12) + "")
+        doc.text(400, 680, 'Total:')
+        doc.text(455, 680, total + "")
+
+
+        var columns = ["Cantidad", "Descripción", "Valor Unitario", "Valor Total"];
+        let data = []
+        for (let i = 0; i < selectedProducts.length; i++) {
+            data[i] = [ selectedProducts[i].pro_stock, selectedProducts[i].pro_nombre, selectedProducts[i].pro_pvp,selectedProducts[i].pro_stock*selectedProducts[i].pro_pvp ]
+        }
+        doc.autoTable(columns, data,
+            { margin: { top: 220 },
+            styles: { fontSize: 8 }}
+        );
+
+        doc.save('Reporte_Clientes_'+hoy.toLocaleDateString()+'.pdf')
+    }
 
     useEffect(() => {
         getAllProducts();
@@ -111,9 +179,22 @@ export const ProductSelection = ({ productsState, selectedProductsState, selecte
             <p>{rowData.pro_iva ? "Si" : "No"}</p>
         )
     };
+    const hideConfirmBilDialog = () => {
+        setconfirmBill(false);
+    }
 
+    const confirmBillDialogFooter = (
+        <>
+            <Button label="No" icon="pi pi-times" className="p-button-text" onClick={hideConfirmBilDialog} />
+            <Button label="Yes" icon="pi pi-check" className="p-button-text" onClick={handleBilling} />
+        </>
+    );
 
+    
 
+    const upConfirmDialog = () => {
+        setconfirmBill(true);
+    }
 
     return (<>
         <Toast ref={toast} />
@@ -138,7 +219,13 @@ export const ProductSelection = ({ productsState, selectedProductsState, selecte
                 <InputNumber min={1} id="horizontal" value={selectedStock} onValueChange={(e) => setSelectedStock(e.value)} showButtons buttonLayout="horizontal" step={1}
                     decrementButtonClassName="p-button-danger" incrementButtonClassName="p-button-success" incrementButtonIcon="pi pi-plus" decrementButtonIcon="pi pi-minus" />
                 <Button className="p-mt-2" label="Agregar" icon="pi pi-plus" onClick={handleAddProducts} />
-                <Button className="p-mt-2" label="Facturar" icon="pi pi-plus" onClick={handleBilling} />
+                <Button className="p-mt-2" label="Facturar" icon="pi pi-plus" onClick={upConfirmDialog} />
+                <Dialog visible={confirmBill} style={{ width: '450px' }} header="Confirm" modal footer={confirmBillDialogFooter} onHide={hideConfirmBilDialog}>
+                        <div className="confirmation-content">
+                            <i className="pi pi-exclamation-triangle p-mr-3" style={{ fontSize: '2rem' }} />
+                            {<span>¿Esta seguro de realizar la compra?</span>}
+                        </div>
+                    </Dialog>
             </div>
             <div className="p-col-5">
                 {selectedProducts.length === 0 ? <h1>Agregue algunos productos para continuar</h1> : <DataTable value={selectedProducts} paginator={true} rows={5}
@@ -147,6 +234,7 @@ export const ProductSelection = ({ productsState, selectedProductsState, selecte
                     <Column header="IVA" body={ivaBodyTemplate}></Column>
                     <Column header="Precio" field="pro_pvp"></Column>
                     <Column header="Stock" field="pro_stock"></Column>
+                    <Column header="Total_PVP" body={total_pvpBodyTemplate}></Column>
                 </DataTable>}
             </div>
         </div>

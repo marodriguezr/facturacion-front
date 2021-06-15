@@ -18,6 +18,8 @@ import { Calendar } from 'primereact/calendar';
 import { Checkbox } from 'primereact/checkbox';
 import "../../assets/css/main.css";
 import { InputMask } from 'primereact/inputmask';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 
 export const Configuracion = ({ setState }) => {
@@ -187,6 +189,7 @@ export const Configuracion = ({ setState }) => {
         return (
             <>
                 <Button label="Crear" icon="pi pi-plus" className="p-button-success p-mr-2" onClick={openNew} />
+                <Button label="Generar reporte" icon="pi pi-file-pdf" className="p-button-primary p-mr-2" onClick={() => generateClientsReport(clients)} />
             </>
         )
     }
@@ -262,6 +265,30 @@ export const Configuracion = ({ setState }) => {
     }
     const EstadoBodyTemplate = (rowData) => {
         return <div className="p-text-center">{rowData.cli_status + ""}</div>
+    }
+
+    const generateClientsReport = (rowData) => {
+        var doc = new jsPDF('p', 'pt');
+        doc.setFontSize(20)
+        doc.setFont('helvetica','bold');
+        doc.text(200, 50, 'Reporte de Clientes')
+        const tiempoTranscurrido = Date.now();
+        const hoy = new Date(tiempoTranscurrido);
+        doc.setFontSize(10)
+        doc.text(45,80,'Fecha: ')
+        doc.setFont('helvetica','normal')
+        doc.text(80,80, hoy.toLocaleDateString())
+        var columns = ["ID", "Cédula", "Nombre", "Fecha de nacimiento", "Dirección", "Correo", "Teléfono", "Tipo", "Estado"];
+        let data = []
+        for (let i = 0; i < rowData.length; i++) {
+            data[i] = [ rowData[i].cli_id, rowData[i].cli_id_card, rowData[i].cli_name, rowData[i].cli_born_date, rowData[i].cli_address, rowData[i].cli_email, rowData[i].cli_phone, rowData[i].payments_type.pt_value, rowData[i].cli_status]
+        }
+        doc.autoTable(columns, data,
+            { margin: { top: 100 },
+            styles: { fontSize: 8 }}
+        );
+
+        doc.save('Reporte_Clientes_'+hoy.toLocaleDateString()+'.pdf')
     }
 
     return (
