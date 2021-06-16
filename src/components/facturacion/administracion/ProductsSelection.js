@@ -144,6 +144,7 @@ export const ProductSelection = ({ productsState, selectedProductsState, selecte
         for (let index = 0; index < selectedProducts.length; index++) {
             total += selectedProducts[index].pro_stock * selectedProducts[index].pro_pvp;
         }
+        console.log(selectedClient.payments_type.pt_id);
         const billHeader = await submitBillHeader(
             total, selectedClient.cli_id, selectedClient.payments_type.pt_id
         );
@@ -220,7 +221,7 @@ export const ProductSelection = ({ productsState, selectedProductsState, selecte
     useEffect(() => {
         getAllProducts();
         setSelectedProducts([]);
-        // selectedClient === null && history.push("/facturacion/createBill");
+        selectedClient === null && history.push("/facturacion/createBill");
     }, []);
 
     const ivaBodyTemplate = (rowData) => {
