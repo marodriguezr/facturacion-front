@@ -5,7 +5,6 @@ export const NavigationBar = () => {
     const history = useHistory();
     const match = useRouteMatch();
 
-    console.log(match);
     const items = [
         {
             label: 'Configuración',
@@ -15,17 +14,22 @@ export const NavigationBar = () => {
                     label: 'Clientes',
                     icon: 'pi pi-fw pi-plus',
                     command: () => {history.push(`${match.path}/configuracion`); }
+                }
+            ]
+        },
+        {
+            label: "Administración",
+            icon: 'pi pi-fw pi-briefcase',
+            items: [
+                {
+                    label: "Registrar nueva factura",
+                    icon: "pi pi-fw pi-shopping-cart",
+                    command: () => {history.push(`${match.path}/createBill`)}
                 },
                 {
-                    label: 'Delete',
-                    icon: 'pi pi-fw pi-trash'
-                },
-                {
-                    separator: true
-                },
-                {
-                    label: 'Export',
-                    icon: 'pi pi-fw pi-external-link'
+                    label: "Revisar facturas",
+                    icon: "pi pi-fw pi-eye",
+                    command: () => {history.push(`${match.path}/viewBills`)}
                 }
             ]
         }

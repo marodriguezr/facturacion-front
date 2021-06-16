@@ -1,6 +1,6 @@
 import axios from "axios";
 
 export const billingAPI = axios.create({
-    baseURL: "http://localhost:4000/facturacion/", 
+    baseURL: process.env.REACT_APP_BILLING_API_URL
 });
 
