@@ -23,6 +23,7 @@ export const ProductSelection = ({ productsState, selectedProductsState, selecte
     const [toAddProducts, setToAddProducts] = useState(null);
     const [toRemoveProducts, setToRemoveProducts] = useState(null);
     const [selectedStock, setSelectedStock] = useState(1);
+    const [total, setTotal] = useState(0.0);
 
     const getAllProducts = async () => {
         const response = await inventoryAPI.get("productos");
@@ -74,10 +75,52 @@ export const ProductSelection = ({ productsState, selectedProductsState, selecte
         setProducts(currentProducts);
         setSelectedProducts(currentSelectedProducts);
         setToAddProducts([]);
+        let total = 0.0;
+        currentSelectedProducts.forEach(element => {
+           total += element.pro_stock * element.pro_pvp;
+        });
+        setTotal(total);
     };
 
     const handleRemoveProducts = () => {
+        if (toRemoveProducts === null) {
+            showWarn("Por favor, seleccione uno o varios productos antes de continuar.");
+            return;
+        }
+        if (toRemoveProducts.length === 0) {
+            showWarn("Por favor, seleccione uno o varios productos antes de continuar.");
+            return;
+        }
+        let currentProducts = products.slice();
+        let currentSelectedProducts = selectedProducts.slice();
+        toRemoveProducts.forEach(element => {
+            if (!(selectedStock <= element.pro_stock)) {
+                showWarn(`Por favor seleccione una cantidad adecuada para el producto: ${element.pro_nombre}, máximo ${element.pro_stock}.`);
+                return;
+            }
+            let currentSelectedProduct = currentSelectedProducts.find((e) => e.pro_id === element.pro_id);
+            currentSelectedProduct.pro_stock -= selectedStock;
+            if (currentSelectedProduct.pro_stock === 0) {
+                currentSelectedProducts = currentSelectedProducts.filter((e) => e.pro_id !== element.pro_id);
+            }
 
+            let currentProduct = currentProducts.find((e) => e.pro_id === element.pro_id);
+            if (!(currentProduct === undefined)) {
+                currentProduct.pro_stock += selectedStock;
+            } else {
+                let toAddProduct = { ...element };
+                toAddProduct.pro_stock = selectedStock;
+                currentProducts.push(toAddProduct);
+            }
+        });
+        setProducts(currentProducts);
+        setSelectedProducts(currentSelectedProducts);
+        setToRemoveProducts([]);
+        let total = 0.0;
+        currentSelectedProducts.forEach(element => {
+           total += element.pro_stock * element.pro_pvp;
+        });
+        setTotal(total);
     };
 
     const submitBillHeader = async (total, clientId, paymentTypeId) => {
@@ -207,7 +250,20 @@ export const ProductSelection = ({ productsState, selectedProductsState, selecte
         <div className="p-grid p-mt-2">
             <div className="p-col-12">
                 <Card>
-                    {/* Totales, subtotal e iva de la factura. */}
+                    <div className="p-grid">
+                        <div className="p-col">
+                            <strong>Total:</strong>
+                            <p>{total}</p>
+                        </div>
+                        <div className="p-col">
+                            <strong>Subtotal:</strong>
+                            <p>{total - (total * 0.12)}</p>
+                        </div>
+                        <div className="p-col">
+                            <strong>IVA:</strong>
+                            <p>{total * 0.12}</p>
+                        </div>
+                    </div>
                 </Card>
             </div>
             <div className="p-col-5">
@@ -222,15 +278,14 @@ export const ProductSelection = ({ productsState, selectedProductsState, selecte
                 </DataTable>}
             </div>
             <div className="p-col-2">
-                <InputNumber min={1} id="horizontal" value={selectedStock} onValueChange={(e) => setSelectedStock(e.value)} showButtons buttonLayout="horizontal" step={1}
-                    decrementButtonClassName="p-button-danger" incrementButtonClassName="p-button-success" incrementButtonIcon="pi pi-plus" decrementButtonIcon="pi pi-minus" />
+                <InputNumber min={1} id="horizontal" value={selectedStock} onValueChange={(e) => setSelectedStock(e.value)} step={1}/>
                 <Button className="p-mt-2" label="Agregar" icon="pi pi-plus" onClick={handleAddProducts} />
                 <Button className="p-mt-2" label="Facturar" icon="pi pi-shopping-cart" onClick={upConfirmDialog} />
-                <Button className="p-mt-2" label="Restar" icon="pi pi-minus" onClick={upConfirmDialog} />
+                <Button className="p-mt-2" label="Restar" icon="pi pi-minus" onClick={handleRemoveProducts} />
                 <Dialog visible={confirmBill} style={{ width: '450px' }} header="Confirm" modal footer={confirmBillDialogFooter} onHide={hideConfirmBilDialog}>
                     <div className="confirmation-content">
                         <i className="pi pi-exclamation-triangle p-mr-3" style={{ fontSize: '2rem' }} />
-                        {<span>¿Esta seguro de realizar la compra?</span>}
+                        {<span>¿Esta seguro de realizar la compra e imprimir la factura?</span>}
                     </div>
                 </Dialog>
             </div>
@@ -238,8 +293,8 @@ export const ProductSelection = ({ productsState, selectedProductsState, selecte
                 {selectedProducts.length === 0 ? <h1>Agregue algunos productos para continuar</h1> : <DataTable value={selectedProducts} paginator={true} rows={5}
                     dataKey="pro_id" selection={toRemoveProducts} onSelectionChange={(e) => setToRemoveProducts(e.value)}>
                     <Column selectionMode="multiple" headerStyle={{ width: '3rem' }}></Column>
-                    <Column field="pro_nombre" header="Nombre"></Column>
-                    <Column header="IVA" body={ivaBodyTemplate}></Column>
+                    <Column field="pro_nombre" sortable={true} filter header="Nombre"></Column>
+                    <Column header="IVA" sortable={true} body={ivaBodyTemplate}></Column>
                     <Column header="Precio" field="pro_pvp"></Column>
                     <Column header="Stock" field="pro_stock"></Column>
                     <Column header="Total_PVP" body={total_pvpBodyTemplate}></Column>

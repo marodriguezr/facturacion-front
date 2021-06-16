@@ -135,8 +135,7 @@ export const Configuracion = ({ setState }) => {
     const actionBodyTemplate = (rowData) => {
         return (
             <>
-                <Button icon="pi pi-pencil" className="p-button-rounded p-button-success p-mr-2" onClick={() => editClient(rowData)} />
-                <Button icon="pi pi-trash" className="p-button-rounded p-button-warning" onClick={() => confirmDeleteClient(rowData)} />
+                <Button icon="pi pi-pencil" className="p-button-rounded p-button-success p-mr-2" onClick={() => editClient(rowData)} />                
             </>
         );
     }
@@ -330,7 +329,7 @@ export const Configuracion = ({ setState }) => {
                         </div>
                         <div className="p-field">
                             <label htmlFor="cli_born_date">Fecha nacimiento</label>
-                            <Calendar id="cli_born_date" dateFormat="yy-mm-dd" value={(new Date(new Date(client.cli_born_date).getFullYear() + "-" + (new Date(client.cli_born_date).getMonth() + 1) + "-" + (new Date(client.cli_born_date).getDate() + 1)))} onChange={(e) => onInputChangeDate(e, 'cli_born_date')} showIcon />
+                            <Calendar id="cli_born_date" dateFormat="yy-mm-dd" value={(new Date(new Date(client.cli_born_date).getFullYear() + "-" + (new Date(client.cli_born_date).getMonth() + 1) + "-" + (new Date(client.cli_born_date).getDate() + 1)))} onChange={(e) => onInputChangeDate(e, 'cli_born_date')}/>
                             {submitted && !client.cli_born_date && <small className="p-invalid">Fecha de Nacimiento es requerida es requerido.</small>}
                         </div>
                         <div className="p-field">
@@ -357,13 +356,7 @@ export const Configuracion = ({ setState }) => {
                             <Checkbox id="cli_status" checked={client.cli_status} onChange={e => onInputChangeBool(e, 'cli_status')} />
                             <label htmlFor="cli_status">Estado</label>
                         </div>
-                    </Dialog>
-                    <Dialog visible={deleteProductDialog} style={{ width: '450px' }} header="Confirm" modal footer={deleteProductDialogFooter} onHide={hideDeleteProductDialog}>
-                        <div className="confirmation-content">
-                            <i className="pi pi-exclamation-triangle p-mr-3" style={{ fontSize: '2rem' }} />
-                            {client && <span>Esta seguro de querer eliminar <b>{client.cli_id_card}</b>?</span>}
-                        </div>
-                    </Dialog>
+                    </Dialog>                    
                 </div>}
         </>
     );
