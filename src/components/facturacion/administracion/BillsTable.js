@@ -72,61 +72,64 @@ export const BillsTable = () => {
         updateBill(rowData.bh_id, rowData.payment_type_id, rowData.client_id, rowData.bh_status, rowData.bh_total, rowData.bh_subtotal, rowData.bh_iva);
     };
 
-    // const generateFacturasReport = (billHeader, selectedProducts, total, selectedClient) => {
-    //     bills.forEach(element => {
-    //         var doc = new jsPDF('p', 'pt');
-    //         doc.setFontSize(20)
-    //         doc.setFont('helvetica', 'bold');
-    //         doc.text(200, 50, 'Factura')
+    const generateFacturasReport = async (billHeader) => {
+        const selectedClient = clients.find((e) => e.cli_id === billHeader.client_id);
+        const response = await billingAPI.get(`bills/byId?bh_id=${billHeader.bh_id}`);
+        console.log(response.data.bill.bills_details);
+        var doc = new jsPDF('p', 'pt');
+        doc.setFontSize(20)
+        doc.setFont('helvetica', 'bold');
+        doc.text(200, 50, 'Factura')
 
-    //         doc.setFontSize(10)
-    //         doc.text(20, 80, 'Nro. Factura:')
-    //         doc.text(90, 80, element.bh_bill_code)
+        doc.setFontSize(10)
+        doc.text(20, 80, 'Nro. Factura:')
+        doc.text(90, 80, billHeader.bh_bill_code)
 
-    //         const tiempoTranscurrido = Date.now();
-    //         const hoy = new Date(tiempoTranscurrido);
-    //         doc.setFontSize(10)
-    //         doc.text(20, 100, 'Fecha: ')
-    //         doc.setFont('helvetica', 'normal')
-    //         doc.text(70, 100, hoy.toLocaleDateString())
+        const tiempoTranscurrido = Date.now();
+        const hoy = new Date(tiempoTranscurrido);
+        doc.setFontSize(10)
+        doc.text(20, 100, 'Fecha: ')
+        doc.setFont('helvetica', 'normal')
+        doc.text(70, 100, hoy.toLocaleDateString())
 
-    //         doc.text(20, 120, 'Nombre del cliente:')
-    //         doc.text(110, 120, selectedClient.cli_name + "")
+        doc.text(20, 120, 'Nombre del cliente:')
+        doc.text(110, 120, selectedClient.cli_name + "")
 
-    //         doc.text(20, 140, 'Cédula:')
-    //         doc.text(70, 140, selectedClient.cli_id_card + "")
+        doc.text(20, 140, 'Cédula:')
+        doc.text(70, 140, selectedClient.cli_id_card + "")
 
-    //         doc.text(20, 160, 'Celular:')
-    //         doc.text(70, 160, selectedClient.cli_phone + "")
+        doc.text(20, 160, 'Celular:')
+        doc.text(70, 160, selectedClient.cli_phone + "")
 
-    //         doc.text(20, 180, 'Correo electrónico:')
-    //         doc.text(110, 180, selectedClient.cli_email + "")
+        doc.text(20, 180, 'Correo electrónico:')
+        doc.text(110, 180, selectedClient.cli_email + "")
 
-    //         doc.text(20, 200, 'Dirección:')
-    //         doc.text(70, 200, selectedClient.cli_address + "")
+        doc.text(20, 200, 'Dirección:')
+        doc.text(70, 200, selectedClient.cli_address + "")
 
-    //         doc.text(400, 660, 'Subtotal:')
-    //         doc.text(455, 660, total - (total * 0.12) + "")
-    //         doc.text(400, 670, 'IVA:')
-    //         doc.text(455, 670, (total * 0.12) + "")
-    //         doc.text(400, 680, 'Total:')
-    //         doc.text(455, 680, total + "")
+        doc.text(400, 660, 'Subtotal:')
+        doc.text(455, 660, billHeader.bh_subtotal + "")
+        doc.text(400, 670, 'IVA:')
+        doc.text(455, 670, billHeader.bh_iva + "")
+        doc.text(400, 680, 'Total:')
+        doc.text(455, 680, billHeader.bh_total + "")
 
 
-    //         var columns = ["Cantidad", "Descripción", "Valor Unitario", "Valor Total"];
-    //         let data = []
-    //         for (let i = 0; i < selectedProducts.length; i++) {
-    //             data[i] = [selectedProducts[i].pro_stock, selectedProducts[i].pro_nombre, selectedProducts[i].pro_pvp, selectedProducts[i].pro_stock * selectedProducts[i].pro_pvp]
-    //         }
-    //         doc.autoTable(columns, data,
-    //             {
-    //                 margin: { top: 220 },
-    //                 styles: { fontSize: 8 }
-    //             }
-    //         );
-    //     });
-    //     doc.save('Reporte_Clientes_' + hoy.toLocaleDateString() + '.pdf')
-    // }
+        var columns = ["Cantidad", "Descripción", "Valor Unitario", "Valor Total"];
+        let data = []
+        for (let i = 0; i < response.data.bill.bills_details.length; i++) {
+            const productName = products.find((element) => element.pro_id === response.data.bill.bills_details[i].bd_product_id).pro_nombre;
+
+            data[i] = [response.data.bill.bills_details[i].bd_amount, productName, response.data.bill.bills_details[i].bd_price, response.data.bill.bills_details[i].bd_amount * response.data.bill.bills_details[i].bd_price]
+        }
+        doc.autoTable(columns, data,
+            {
+                margin: { top: 220 },
+                styles: { fontSize: 8 }
+            }
+        );
+        doc.save('Reporte_Clientes_' + hoy.toLocaleDateString() + '.pdf')
+    };
 
     const paymentTypeBodyTemplate = (rowData) => {
         return (<>
@@ -148,6 +151,7 @@ export const BillsTable = () => {
         return (
             <>
                 <Button icon="pi pi-fw pi-plus" title="Revisar los detalles de la factura" onClick={() => { getSelectedBill(rowData.bh_id); setIsBillDetailsDialogVisible(true); }}></Button>
+                <Button className="p-ml-2" icon="pi pi-fw pi-print" title="Imprimir factura" onClick={() => { generateFacturasReport(rowData) }}></Button>
             </>
         );
     };
@@ -177,19 +181,18 @@ export const BillsTable = () => {
                 <>
                     <Card title="Revisión de facturas" >
                         <p>Bienvenido, en esta vista podra cambiar el estado de las facturas, revisarlas y extraer reportes de ellas.</p>
-                        <Button icon="pi pi-fw pi-print" title="Obtener reporte de todas las facturas" label="Obtener reporte de todas las facturas"></Button>
                     </Card>
                     <DataTable className="p-mt-2" value={billsHeaders} paginator={true} rows={5}
                         dataKey="bh_id"
                     >
-                        <Column field="bh_bill_code" header="Código" filter></Column>
-                        <Column field="bh_date" header="Fecha"></Column>
-                        <Column field="bh_total" header="Total"></Column>
+                        <Column field="bh_bill_code" header="Código" sortable filter></Column>
+                        <Column field="bh_date" header="Fecha" sortable></Column>
+                        <Column field="bh_total" header="Total" sortable></Column>
                         <Column field="bh_subtotal" header="Subtotal"></Column>
                         <Column field="bh_iva" header="Iva"></Column>
                         {paymentTypes === null ? <></> : <Column body={paymentTypeBodyTemplate} header="Pago"></Column>}
                         {clients === null ? <></> : <Column body={clientBodyTemplate} header="Cliente"></Column>}
-                        <Column header="Estado" body={billStatusBodyTemplate}></Column>
+                        <Column header="Estado" field="bh_status" sortable body={billStatusBodyTemplate}></Column>
                         <Column body={billOptionsBodyTemplate}></Column>
                     </DataTable>
                 </>

@@ -20,7 +20,8 @@ export const ProductSelection = ({ productsState, selectedProductsState, selecte
     const [selectedProducts, setSelectedProducts] = selectedProductsState;
     const [selectedClient, setSelectedClient] = selectedClientState;
     const [confirmBill, setconfirmBill] = useState(false);
-    const [selectedInternalProducts, setSelectedInternalProducts] = useState(null);
+    const [toAddProducts, setToAddProducts] = useState(null);
+    const [toRemoveProducts, setToRemoveProducts] = useState(null);
     const [selectedStock, setSelectedStock] = useState(1);
 
     const getAllProducts = async () => {
@@ -37,17 +38,17 @@ export const ProductSelection = ({ productsState, selectedProductsState, selecte
     }
 
     const handleAddProducts = () => {
-        if (selectedInternalProducts === null) {
+        if (toAddProducts === null) {
             showWarn("Por favor, seleccione uno o varios productos antes de continuar.");
             return;
         }
-        if (selectedInternalProducts.length === 0) {
+        if (toAddProducts.length === 0) {
             showWarn("Por favor, seleccione uno o varios productos antes de continuar.");
             return;
         }
         let currentProducts = products.slice();
         let currentSelectedProducts = selectedProducts.slice();
-        selectedInternalProducts.forEach(element => {
+        toAddProducts.forEach(element => {
             if (!(selectedStock <= element.pro_stock)) {
                 showWarn(`Por favor seleccione una cantidad adecuada para el producto: ${element.pro_nombre}, máximo ${element.pro_stock}.`);
                 return;
@@ -59,20 +60,24 @@ export const ProductSelection = ({ productsState, selectedProductsState, selecte
             }
 
             let currentSelectedProduct = currentSelectedProducts.find((e) => e.pro_id === element.pro_id);
-           
+
             if (!(currentSelectedProduct === undefined)) {
                 currentSelectedProduct.pro_stock += selectedStock;
-               
+
             } else {
                 let toAddProduct = { ...element };
                 toAddProduct.pro_stock = selectedStock;
                 currentSelectedProducts.push(toAddProduct);
-                
+
             }
         });
         setProducts(currentProducts);
         setSelectedProducts(currentSelectedProducts);
-        setSelectedInternalProducts([]);
+        setToAddProducts([]);
+    };
+
+    const handleRemoveProducts = () => {
+
     };
 
     const submitBillHeader = async (total, clientId, paymentTypeId) => {
@@ -103,21 +108,21 @@ export const ProductSelection = ({ productsState, selectedProductsState, selecte
             await submitBillDetail(element.pro_stock, element.pro_pvp, element.pro_iva, billHeader.bh_id, element.pro_id);
         });
         showSuccess("Factura registrada con éxito.");
-        generateFacturasReport (billHeader,selectedProducts,total)
+        generateFacturasReport(billHeader, selectedProducts, total)
         history.push(`/facturacion/viewBills`)
         setconfirmBill(false)
     };
 
-    const total_pvpBodyTemplate=(rowData)=>{ 
-        return (<p>{rowData.pro_stock*rowData.pro_pvp}</p>)
+    const total_pvpBodyTemplate = (rowData) => {
+        return (<p>{rowData.pro_stock * rowData.pro_pvp}</p>)
     };
 
-    const generateFacturasReport = (billHeader,selectedProducts,total) => {
+    const generateFacturasReport = (billHeader, selectedProducts, total) => {
 
-        
+
         var doc = new jsPDF('p', 'pt');
         doc.setFontSize(20)
-        doc.setFont('helvetica','bold');
+        doc.setFont('helvetica', 'bold');
         doc.text(200, 50, 'Factura')
 
         doc.setFontSize(10)
@@ -127,29 +132,29 @@ export const ProductSelection = ({ productsState, selectedProductsState, selecte
         const tiempoTranscurrido = Date.now();
         const hoy = new Date(tiempoTranscurrido);
         doc.setFontSize(10)
-        doc.text(20,100,'Fecha: ')
-        doc.setFont('helvetica','normal')
-        doc.text(70,100, hoy.toLocaleDateString())
+        doc.text(20, 100, 'Fecha: ')
+        doc.setFont('helvetica', 'normal')
+        doc.text(70, 100, hoy.toLocaleDateString())
 
         doc.text(20, 120, 'Nombre del cliente:')
-        doc.text(110, 120, selectedClient.cli_name+"")
+        doc.text(110, 120, selectedClient.cli_name + "")
 
         doc.text(20, 140, 'Cédula:')
-        doc.text(70, 140, selectedClient.cli_id_card+"")
+        doc.text(70, 140, selectedClient.cli_id_card + "")
 
         doc.text(20, 160, 'Celular:')
-        doc.text(70, 160, selectedClient.cli_phone+"")
+        doc.text(70, 160, selectedClient.cli_phone + "")
 
         doc.text(20, 180, 'Correo electrónico:')
-        doc.text(110, 180, selectedClient.cli_email+"")
+        doc.text(110, 180, selectedClient.cli_email + "")
 
         doc.text(20, 200, 'Dirección:')
-        doc.text(70, 200,selectedClient.cli_address+"")
+        doc.text(70, 200, selectedClient.cli_address + "")
 
         doc.text(400, 660, 'Subtotal:')
-        doc.text(455, 660, total-(total*0.12) + "")
+        doc.text(455, 660, total - (total * 0.12) + "")
         doc.text(400, 670, 'IVA:')
-        doc.text(455, 670, (total*0.12) + "")
+        doc.text(455, 670, (total * 0.12) + "")
         doc.text(400, 680, 'Total:')
         doc.text(455, 680, total + "")
 
@@ -157,20 +162,22 @@ export const ProductSelection = ({ productsState, selectedProductsState, selecte
         var columns = ["Cantidad", "Descripción", "Valor Unitario", "Valor Total"];
         let data = []
         for (let i = 0; i < selectedProducts.length; i++) {
-            data[i] = [ selectedProducts[i].pro_stock, selectedProducts[i].pro_nombre, selectedProducts[i].pro_pvp,selectedProducts[i].pro_stock*selectedProducts[i].pro_pvp ]
+            data[i] = [selectedProducts[i].pro_stock, selectedProducts[i].pro_nombre, selectedProducts[i].pro_pvp, selectedProducts[i].pro_stock * selectedProducts[i].pro_pvp]
         }
         doc.autoTable(columns, data,
-            { margin: { top: 220 },
-            styles: { fontSize: 8 }}
+            {
+                margin: { top: 220 },
+                styles: { fontSize: 8 }
+            }
         );
 
-        doc.save('Reporte_Clientes_'+hoy.toLocaleDateString()+'.pdf')
+        doc.save('Reporte_Clientes_' + hoy.toLocaleDateString() + '.pdf')
     }
 
     useEffect(() => {
         getAllProducts();
         setSelectedProducts([]);
-        selectedClient === null && history.push("/facturacion/createBill");
+        // selectedClient === null && history.push("/facturacion/createBill");
     }, []);
 
     const ivaBodyTemplate = (rowData) => {
@@ -189,7 +196,7 @@ export const ProductSelection = ({ productsState, selectedProductsState, selecte
         </>
     );
 
-    
+
 
     const upConfirmDialog = () => {
         setconfirmBill(true);
@@ -204,31 +211,33 @@ export const ProductSelection = ({ productsState, selectedProductsState, selecte
                 </Card>
             </div>
             <div className="p-col-5">
-                {products === null ? <ProgressSpinner /> : <DataTable value={products} paginator={true} rows={5} selection={selectedInternalProducts} onSelectionChange={(e) => setSelectedInternalProducts(e.value)}
+                {products === null ? <ProgressSpinner /> : <DataTable value={products} paginator={true} rows={5} selection={toAddProducts} onSelectionChange={(e) => setToAddProducts(e.value)}
                     dataKey="pro_id"
                 >
                     <Column sortable={true} filter field="pro_nombre" header="Nombre"></Column>
                     <Column sortable={true} header="IVA" body={ivaBodyTemplate}></Column>
                     <Column sortable={true} header="Precio" field="pro_pvp"></Column>
                     <Column sortable={true} header="Stock" field="pro_stock"></Column>
-                    <Column sortable={true} selectionMode="multiple" headerStyle={{ width: '3rem' }}></Column>
+                    <Column selectionMode="multiple" headerStyle={{ width: '3rem' }}></Column>
                 </DataTable>}
             </div>
             <div className="p-col-2">
                 <InputNumber min={1} id="horizontal" value={selectedStock} onValueChange={(e) => setSelectedStock(e.value)} showButtons buttonLayout="horizontal" step={1}
                     decrementButtonClassName="p-button-danger" incrementButtonClassName="p-button-success" incrementButtonIcon="pi pi-plus" decrementButtonIcon="pi pi-minus" />
                 <Button className="p-mt-2" label="Agregar" icon="pi pi-plus" onClick={handleAddProducts} />
-                <Button className="p-mt-2" label="Facturar" icon="pi pi-plus" onClick={upConfirmDialog} />
+                <Button className="p-mt-2" label="Facturar" icon="pi pi-shopping-cart" onClick={upConfirmDialog} />
+                <Button className="p-mt-2" label="Restar" icon="pi pi-minus" onClick={upConfirmDialog} />
                 <Dialog visible={confirmBill} style={{ width: '450px' }} header="Confirm" modal footer={confirmBillDialogFooter} onHide={hideConfirmBilDialog}>
-                        <div className="confirmation-content">
-                            <i className="pi pi-exclamation-triangle p-mr-3" style={{ fontSize: '2rem' }} />
-                            {<span>¿Esta seguro de realizar la compra?</span>}
-                        </div>
-                    </Dialog>
+                    <div className="confirmation-content">
+                        <i className="pi pi-exclamation-triangle p-mr-3" style={{ fontSize: '2rem' }} />
+                        {<span>¿Esta seguro de realizar la compra?</span>}
+                    </div>
+                </Dialog>
             </div>
             <div className="p-col-5">
                 {selectedProducts.length === 0 ? <h1>Agregue algunos productos para continuar</h1> : <DataTable value={selectedProducts} paginator={true} rows={5}
-                    dataKey="pro_id">
+                    dataKey="pro_id" selection={toRemoveProducts} onSelectionChange={(e) => setToRemoveProducts(e.value)}>
+                    <Column selectionMode="multiple" headerStyle={{ width: '3rem' }}></Column>
                     <Column field="pro_nombre" header="Nombre"></Column>
                     <Column header="IVA" body={ivaBodyTemplate}></Column>
                     <Column header="Precio" field="pro_pvp"></Column>

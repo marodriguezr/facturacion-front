@@ -14,17 +14,6 @@ export const NavigationBar = () => {
                     label: 'Clientes',
                     icon: 'pi pi-fw pi-plus',
                     command: () => {history.push(`${match.path}/configuracion`); }
-                },
-                {
-                    label: 'Delete',
-                    icon: 'pi pi-fw pi-trash'
-                },
-                {
-                    separator: true
-                },
-                {
-                    label: 'Export',
-                    icon: 'pi pi-fw pi-external-link'
                 }
             ]
         },
