@@ -1,14 +1,18 @@
 import { Switch, Route } from "react-router-dom";
-import {FacturacionRouter} from "./routes/FacturacionRouter.js";
+import { FacturacionRouter } from "./routes/FacturacionRouter.js";
+import { useHistory } from "react-router-dom";
 
-import {ModuleOne} from "./containers/moduleOne/index.js";
+const RedirectFacturacion = () => {
+  const history = useHistory();
+  history.push("facturacion");
+  return (<></>);
+};
 
 function App() {
   return (
     <Switch>
       <Route exact path="/">
-        {/* Pagina de presentacion  */}
-        <ModuleOne></ModuleOne>
+        <RedirectFacturacion></RedirectFacturacion>
       </Route>
       <Route path="/facturacion">
         <FacturacionRouter></FacturacionRouter>
