@@ -52,14 +52,14 @@ export const ClientSelection = ({ clientsState, selectedClientState }) => {
     };
 
     const handlePaymentType = () => {
-        if (selectedClient.payments_type.pt_value.trim().toLowerCase() === "credito" || "crédito") {
+        console.log(selectedClient.payments_type.pt_value.trim().toLowerCase());
+        if (selectedClient.payments_type.pt_value.trim().toLowerCase() === "credito" || selectedClient.payments_type.pt_value.trim().toLowerCase() === "crédito") {
             return (
                 <>
                     <Dropdown className="p-d-flex" value={selectedClient.payments_type} options={paymentTypes} onChange={(e) => { setSelectedClient({ ...selectedClient, payments_type: e.value }); let currentClients = clients.slice(); currentClients.find((element) => element.cli_id === selectedClient.cli_id).payments_type = e.value; setClients(currentClients); }} optionLabel="pt_value" placeholder="Seleccione un tipo de pago" />
                 </>
             );
         } else {
-
             return (<p>Contado</p>);
         }
     };
@@ -115,7 +115,7 @@ export const ClientSelection = ({ clientsState, selectedClientState }) => {
                                 </div>
                                 <div className="p-field">
                                     <label className="p-d-block">Tipo de pago</label>
-                                    {hanldeClientPaymentType(selectedClient.cli_payment_type_id)}
+                                    {paymentTypes.length !== 0 && hanldeClientPaymentType(selectedClient.cli_payment_type_id)}
                                 </div>
                             </Card>}
                         </div>
